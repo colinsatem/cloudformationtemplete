@@ -1,0 +1,126 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "",
+    "Metadata": {
+
+    },
+    "Parameters": {
+      "myVpcCidrblock": {
+          "Description": "Give a CidrBlock for myVpc",
+          "Type": "String",
+          "Default": "10.0.0.0/16"
+      },
+      "myVpcPBSNCidrblock": {
+          "Description": "Give a CidrBlock for myVpcPBSN",
+          "Type": "String",
+          "Default": "10.0.0.0/24"
+      },
+      "myVpcPVSNCidrblock": {
+          "Description": "Give a CidrBlock for myVpcPVSN",
+          "Type": "String",
+          "Default": "10.0.1.0/24"
+      },
+      "myVpcPBSNaz": {
+          "Description": "Give an AZ for myVpcPBSN",
+          "Type": "AWS::EC2::AvailabilityZone::Name",
+          "Default": "us-east-1a"
+      },
+      "myVpcPVSNaz": {
+          "Description": "Give an AZ for myVpcPVSN",
+          "Type": "AWS::EC2::AvailabilityZone::Name",
+          "Default": "us-east-1b"
+      },
+      "myVpcDestCidrblock": {
+          "Description": "Give a value for myVpcDestCidrblock",
+          "Type": "String",
+          "Default": "0.0.0.0/0"
+      }
+
+    },
+    "Mappings": {
+
+    },
+    "Conditions": {
+
+    },
+    "Resources": {
+      "myVpc": {
+        "Type": "AWS::EC2::VPC",
+        "Properties": {
+          "CidrBlock": { "Ref": "myVpcCidrblock" },
+          "Tags": [{ "Key": "Name", "Value":  "myVpc" }]
+        }
+      },
+      "myVpcIGW": {
+        "Type": "AWS::EC2::InternetGateway",
+        "Properties": {
+          "Tags": [{ "Key": "Name", "Value":  "myVpcIGW" }]
+        }
+      },
+      "myVpcIGWAttachment": {
+        "Type": "AWS::EC2::VPCGatewayAttachment",
+        "Properties": {
+          "VpcId": { "Ref": "myVpc" },
+          "InternetGatewayId": { "Ref": "myVpcIGW" }
+        }
+      },
+      "myVpcPBSN": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "AvailabilityZone": { "Ref": "myVpcPBSNaz" },
+          "VpcId": { "Ref": "myVpc" },
+          "CidrBlock": { "Ref": "myVpcPBSNCidrblock" },
+          "Tags": [{ "Key": "Name", "Value":  "myVpcPBSN" }]
+        }
+      },
+      "myVpcPVSN": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "AvailabilityZone": { "Ref": "myVpcPVSNaz" },
+          "VpcId": { "Ref": "myVpc" },
+          "CidrBlock": { "Ref": "myVpcPVSNCidrblock" },
+          "Tags": [{ "Key": "Name", "Value":  "myVpcPVSN" }]
+        }
+      },
+      "myVpcPBRT": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": { "Ref": "myVpc" },
+          "Tags": [{ "Key": "Name", "Value":  "myVpcPBRT" }]
+        }
+      },
+      "myVpcPVRT": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": { "Ref": "myVpc" },
+          "Tags": [{ "Key": "Name", "Value":  "myVpcPVRT" }]
+        }
+      },
+      "myVpcPBRTass": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": { "Ref": "myVpcPBSN" },
+          "RouteTableId": { "Ref": "myVpcPBRT" }
+        }
+      },
+      "myVpcPVRTAss": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": { "Ref": "myVpcPVSN" },
+          "RouteTableId": { "Ref": "myVpcPVRT" }
+        }
+      },
+      "routeName": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+          "RouteTableId": { "Ref": "myVpcPBRT" },
+          "DestinationCidrBlock": { "Ref": "myVpcDestCidrblock" },
+          "GatewayId": { "Ref": "myVpcIGW" }
+        }
+      }
+
+    },
+    "Outputs":{
+
+    }
+}
